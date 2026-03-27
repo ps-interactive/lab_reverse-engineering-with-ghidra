@@ -3,7 +3,7 @@
 # CarvedRock Security Training Lab
 # Runs during lab instantiation to create analysis targets
 
-set +e  # Continue on errors so partial builds still produce usable samples
+set +e 
 
 SAMPLES_DIR="/home/ubuntu/ghidra_lab/samples"
 SRC_DIR="/home/ubuntu/ghidra_lab/samples/src"
