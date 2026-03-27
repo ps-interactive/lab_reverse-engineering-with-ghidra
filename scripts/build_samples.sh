@@ -3,7 +3,7 @@
 # CarvedRock Security Training Lab
 # Runs during lab instantiation to create analysis targets
 
-set -e
+set +e  
 
 SAMPLES_DIR="/home/ubuntu/ghidra_lab/samples"
 SRC_DIR="/home/ubuntu/ghidra_lab/samples/src"
@@ -20,23 +20,24 @@ gcc -o "$OUTPUT_DIR/sample_packed.bin" "$SRC_DIR/sample_packed.c" \
 upx --best "$OUTPUT_DIR/sample_packed.bin" 2>/dev/null || true
 echo "[+] sample_packed.bin created (UPX-packed)"
 
-# Sample 2: Obfuscated binary (compile with stripped symbols)
+# Sample 2: Obfuscated binary (keep function names - they ARE the obfuscation)
 echo "[*] Building sample_obfuscated..."
 gcc -o "$OUTPUT_DIR/sample_obfuscated.bin" "$SRC_DIR/sample_obfuscated.c" \
-    -no-pie -O0 -s
+    -no-pie -O0 -g0
 strip --strip-debug "$OUTPUT_DIR/sample_obfuscated.bin"
-echo "[+] sample_obfuscated.bin created (stripped)"
+echo "[+] sample_obfuscated.bin created"
 
-# Sample 3: Reflective loader (compile normally for analysis)
+# Sample 3: Reflective loader (keep function names for analysis)
 echo "[*] Building sample_reflective..."
 gcc -o "$OUTPUT_DIR/sample_reflective.bin" "$SRC_DIR/sample_reflective.c" \
-    -no-pie -O0 -s
+    -no-pie -O0 -g0
+strip --strip-debug "$OUTPUT_DIR/sample_reflective.bin"
 echo "[+] sample_reflective.bin created"
 
-# Sample 4: Custom-packed binary (compile with stripped symbols)
+# Sample 4: Custom-packed binary (keep function names for analysis)
 echo "[*] Building sample_custom_packed..."
 gcc -o "$OUTPUT_DIR/sample_custom_packed.bin" "$SRC_DIR/sample_custom_packed.c" \
-    -no-pie -O0 -s
+    -no-pie -O0 -g0
 strip --strip-debug "$OUTPUT_DIR/sample_custom_packed.bin"
 echo "[+] sample_custom_packed.bin created (custom packer)"
 
