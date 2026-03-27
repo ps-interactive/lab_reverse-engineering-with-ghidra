@@ -38,9 +38,13 @@ def extract_encrypted_strings(filepath, key, min_length=4):
     decoded = xor_decode(data, key)
 
     # Find printable string sequences in decoded data
+    # Note: in XOR-encrypted data, null terminators (0x00) in the original
+    # become the key value after XOR. We treat both null bytes and runs of
+    # the key-decoded-null character as separators.
     found_strings = []
     current_string = b""
     start_offset = 0
+    xor_null = key  # What a null byte looks like before decoding
 
     for i, byte in enumerate(decoded):
         if 0x20 <= byte <= 0x7E:  # Printable ASCII
@@ -49,11 +53,25 @@ def extract_encrypted_strings(filepath, key, min_length=4):
             current_string += bytes([byte])
         else:
             if len(current_string) >= min_length:
-                found_strings.append((start_offset, current_string.decode("ascii")))
+                # Split on runs of the decoded-null character in case
+                # adjacent encrypted strings were concatenated
+                parts = current_string.decode("ascii").split(chr(key))
+                sub_offset = start_offset
+                for part in parts:
+                    part = part.strip()
+                    if len(part) >= min_length:
+                        found_strings.append((sub_offset, part))
+                    sub_offset += len(part) + 1
             current_string = b""
 
     if len(current_string) >= min_length:
-        found_strings.append((start_offset, current_string.decode("ascii")))
+        parts = current_string.decode("ascii").split(chr(key))
+        sub_offset = start_offset
+        for part in parts:
+            part = part.strip()
+            if len(part) >= min_length:
+                found_strings.append((sub_offset, part))
+            sub_offset += len(part) + 1
 
     # Filter for interesting strings (URLs, paths, IPs, etc.)
     interesting_patterns = [
