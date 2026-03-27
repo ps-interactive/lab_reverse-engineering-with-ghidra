@@ -8,9 +8,9 @@
 #   ghidra_headless.sh samples/sample_obfuscated.bin FindXORStrings
 
 BINARY="$1"
-SCRIPT="$2"
+SCRIPT_NAME="$2"
 
-if [ -z "$BINARY" ] || [ -z "$SCRIPT" ]; then
+if [ -z "$BINARY" ] || [ -z "$SCRIPT_NAME" ]; then
     echo "Usage: $0 <binary_path> <script_name>"
     echo ""
     echo "Available scripts:"
@@ -34,12 +34,13 @@ PROJECT_DIR=/tmp/ghidra_headless_$$
 mkdir -p "$PROJECT_DIR"
 
 # Run headless analysis with the specified script
+# Filter: keep only script println() output, strip Ghidra prefixes
 "$HEADLESS" "$PROJECT_DIR" "TempProject" \
     -import "$BINARY" \
     -overwrite \
     -scriptPath "$SCRIPTS_DIR" \
-    -postScript "${SCRIPT}.java" \
-    2>/dev/null | grep -E "^(===|---|    |\[\*\]|\[\!\]|\[+\]|\[-\]|Binary:|[A-Za-z])"
+    -postScript "${SCRIPT_NAME}.java" \
+    2>&1 | grep "(GhidraScript)" | sed 's/^.*> //; s/ (GhidraScript)\s*$//'
 
 # Cleanup temp project
 rm -rf "$PROJECT_DIR"
