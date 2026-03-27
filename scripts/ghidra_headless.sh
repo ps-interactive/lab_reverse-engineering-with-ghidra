@@ -33,14 +33,12 @@ PROJECT_DIR=/tmp/ghidra_headless_$$
 
 mkdir -p "$PROJECT_DIR"
 
-# Run headless analysis with the specified script
-# Filter: keep only script println() output, strip Ghidra prefixes
+# Run headless analysis with the specified script (full unfiltered output)
 "$HEADLESS" "$PROJECT_DIR" "TempProject" \
     -import "$BINARY" \
     -overwrite \
     -scriptPath "$SCRIPTS_DIR" \
-    -postScript "${SCRIPT_NAME}.java" \
-    2>&1 | grep "(GhidraScript)" | sed 's/^.*> //; s/ (GhidraScript)\s*$//'
+    -postScript "${SCRIPT_NAME}.java"
 
 # Cleanup temp project
 rm -rf "$PROJECT_DIR"
